@@ -1,3 +1,6 @@
 .dacecache/
 __pycache__/
 *.pyc
+*.egg-info/
+.pytest_cache/
+.compile_cache/

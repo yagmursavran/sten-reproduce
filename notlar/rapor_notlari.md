@@ -51,7 +51,8 @@ Makaledeki donanım: AMD EPYC 7742 (64 çekirdek, AVX2), Intel Xeon Gold 6130 (1
   - STen vs linear(x.T, W): ~4.8e-07 (yani girdi ters okunuyor)
 - Hız etkilenmiyor (aynı sayıda işlem); makale doğruluğu maskeli dense ile ölçtüğü için muhtemelen makaledeki sonuçları etkilemiyor.
 - Önerilen düzeltme: `trans_b = trans_b and dense.is_contiguous()` → hata ~1e-6'ya iniyor.
-- Durum: 🔬 Claude'un ortamında (Python 3.10/3.11/3.12) görüldü; bizim bilgisayarlarda doğrulanacak.
+- Durum: ✅ Berfin/Victus'ta doğrulandı (3 Kasım): STen vs doğru = 2.7545, STen vs linear(x.T, W) = 4.77e-07.
+- Derleme sırasında DaCe uyarısı: "Incompatible strides: inner (4, 1, 6144, 1536, 96) - outer (4, 1, 1536, 96)". Hatayla ilişkisi henüz bilinmiyor.
 - Önemli: STen'in kendi testleri (tests/test_nmg.py) sonucun doğruluğunu kontrol etmiyor, bu yüzden hata yakalanmamış.
 
 ## 6. Makaledeki eksikler (reproduce açısından)
