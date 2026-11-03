@@ -69,3 +69,19 @@ Makaledeki donanım: AMD EPYC 7742 (64 çekirdek, AVX2), Intel Xeon Gold 6130 (1
 - max|err| 4.8–6.3: transpoze hatası tüm modelde görülüyor; hız ölçümünü etkilemiyor
 - Format başına çevirme ~35 s, ilk çalıştırmada format başına 3 derleme
 - Eğilim makaleyle aynı (seyreklik ↑ → hızlanma ↑); makale BERT-base'de en çok 3.2x
+### 3 Kasım – Figür 15b küçük ölçek (bert-small, orijinal kod)
+- Makine: Victus, Ryzen 7 7840HS, şarjda, OMP_NUM_THREADS=8, torch 2.4.1
+- Girdi 8x128, g=4, kernel avx512 (otomatik), medyan / 10 tekrar, 2 ısınma
+- Betik: deneyler/bert_latency.py | Sonuçlar: results/bert_small.csv, results/bert_small_run2.csv
+
+| Format | Seyreklik | Ölçüm 1 | Ölçüm 2 | Hızlanma 1 | Hızlanma 2 |
+|---|---|---|---|---|---|
+| dense | 0% | 80.0 ms | 82.2 ms | – | – |
+| 3:6:4 | 50% | 59.2 ms | 61.4 ms | 1.35x | 1.34x |
+| 2:7:4 | 71% | 53.7 ms | 52.8 ms | 1.49x | 1.56x |
+| 1:10:4 | 90% | 36.6 ms | 38.2 ms | 2.19x | 2.15x |
+
+- max|err| 6.29 / 5.74 / 4.84 (iki ölçümde aynı): transpoze hatası tüm modelde görülüyor; hız ölçümünü etkilemiyor
+- İlk çalıştırmada format başına 3 derleme (3 farklı matris boyutu); format başına çevirme ~35 s
+- Eğilim makaleyle aynı (seyreklik ↑ → hızlanma ↑). Makale BERT-base'de en çok 3.2x; küçük modelde
+  matrisler küçük, çarpım dışı işlerin payı büyük → daha düşük hızlanma beklenir
