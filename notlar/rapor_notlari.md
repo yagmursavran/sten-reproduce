@@ -85,3 +85,13 @@ Makaledeki donanım: AMD EPYC 7742 (64 çekirdek, AVX2), Intel Xeon Gold 6130 (1
 - İlk çalıştırmada format başına 3 derleme (3 farklı matris boyutu); format başına çevirme ~35 s
 - Eğilim makaleyle aynı (seyreklik ↑ → hızlanma ↑). Makale BERT-base'de en çok 3.2x; küçük modelde
   matrisler küçük, çarpım dışı işlerin payı büyük → daha düşük hızlanma beklenir
+### 3 Kasım – Figür 12 energy (bert-base-uncased, katman 8, attention query, 768x768)
+- Betik: deneyler/energy.py | Sonuç: results/energy.csv, results/energy.png
+- Energy = ||budanmış||₁ / ||orijinal||₁
+- 7 seviyenin hepsinde sıralama makaleyle aynı:
+  yapısız > n:m > n:m:g g=16 > g=4 > g=1 > blok b=2 > b=4 > b=8
+- 50% (3:6): yapısız 0.798, n:m 0.760, g=16 0.754, g=4 0.744, g=1 0.720, b=2 0.655, b=4 0.582, b=8 0.549
+- 90% (1:10): yapısız 0.262, n:m 0.237, g=16 0.232, g=4 0.225, g=1 0.207, b=2 0.177, b=4 0.139, b=8 0.123
+- g=16 n:m'ye çok yakın (50%'de fark 0.006); g=4 n:m'nin ~%95–98'ini koruyor
+- 90%'da n:m:g g=4 bloklu b=4'ten ~%60 fazla energy koruyor
+- Hız deneyiyle birlikte: 1:10:4 → ~2.2x hız, energy yapısıza yakın
