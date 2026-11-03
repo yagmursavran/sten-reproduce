@@ -61,5 +61,11 @@ Makaledeki donanım: AMD EPYC 7742 (64 çekirdek, AVX2), Intel Xeon Gold 6130 (1
 - Özet "best available implementation" diyor; kodda maliyet modeli yok, sadece tam eşleşme aranıyor.
 
 ## 7. Deney günlüğü
-(Her deney için: tarih, kim, makine, komut, sonuç)
-
+### 3 Kasım – Figür 15b küçük ölçek (bert-small, orijinal kod)
+- Makine: Victus, Ryzen 7 7840HS, OMP_NUM_THREADS=8, şarjda
+- Girdi 8x128, g=4, kernel avx512 (otomatik seçildi)
+- dense 80.0 ms | 3:6:4 59.2 ms (1.35x) | 2:7:4 53.7 ms (1.49x) | 1:10:4 36.6 ms (2.19x)
+- 2. çalıştırma: ...
+- max|err| 4.8–6.3: transpoze hatası tüm modelde görülüyor; hız ölçümünü etkilemiyor
+- Format başına çevirme ~35 s, ilk çalıştırmada format başına 3 derleme
+- Eğilim makaleyle aynı (seyreklik ↑ → hızlanma ↑); makale BERT-base'de en çok 3.2x
