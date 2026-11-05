@@ -8,7 +8,7 @@ For comparison the script also times PyTorch's own built-in sparse format (CSR),
 skips the zeros.
 
 Usage:
-  python deneyler/pytorch_zeros_check.py --threads 8
+  python experiments/pytorch_zeros_check.py --threads 8
 """
 import argparse
 import statistics

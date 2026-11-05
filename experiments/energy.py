@@ -12,8 +12,8 @@ The paper uses bert-base-uncased, layer 8, attention query weight. Without --pre
 Gaussian matrix is used: that only tests the pipeline, its numbers are not comparable to the paper.
 
 Usage:
-  python deneyler/energy.py --pretrained bert-base-uncased
-  python deneyler/energy.py --pretrained prajjwal1/bert-small --layer 2
+  python experiments/energy.py --pretrained bert-base-uncased
+  python experiments/energy.py --pretrained prajjwal1/bert-small --layer 2
 """
 import argparse
 import csv

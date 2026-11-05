@@ -6,13 +6,13 @@ SparsityBuilder, exactly like the repository's tests/test_nmg.py. For each forma
   2. measures the median latency over several runs (after a warm-up call that compiles the kernel).
 
 Usage examples:
-  python deneyler/bert_latency.py                                   # 2-layer random BERT, quick
-  python deneyler/bert_latency.py --pretrained prajjwal1/bert-small # small pretrained BERT
-  python deneyler/bert_latency.py --pretrained bert-base-uncased --batch 8 --seq 512  # paper setting
-  python deneyler/bert_latency.py --kernel avx2                     # force the AVX2 kernel
+  python experiments/bert_latency.py                                   # 2-layer random BERT, quick
+  python experiments/bert_latency.py --pretrained prajjwal1/bert-small # small pretrained BERT
+  python experiments/bert_latency.py --pretrained bert-base-uncased --batch 8 --seq 512  # paper setting
+  python experiments/bert_latency.py --kernel avx2                     # force the AVX2 kernel
 
 Full paper setting of Fig. 15b (BERT-base, batch 8, sequence 512, all seven sparsity levels):
-  python deneyler/bert_latency.py --pretrained bert-base-uncased --batch 8 --seq 512 \
+  python experiments/bert_latency.py --pretrained bert-base-uncased --batch 8 --seq 512 \
       --formats 3:6,2:5,2:6,2:7,1:5,1:10,1:20 --threads 8 --out results/bert_base_run1.csv
 
 Time breakdown (like the stacked bars of Fig. 15b): after the latency measurement, a second pass

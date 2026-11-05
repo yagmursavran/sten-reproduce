@@ -5,7 +5,7 @@ Input: one or more CSV files from bert_latency.py (one per run). For every forma
 runs is plotted, with a thin line showing the min-max range across runs.
 
 Usage:
-  python deneyler/plot_fig15b.py results/bert_base_run1.csv results/bert_base_run2.csv \
+  python experiments/plot_fig15b.py results/bert_base_run1.csv results/bert_base_run2.csv \
       --out results/fig15b_bert_base.png
 """
 import argparse
