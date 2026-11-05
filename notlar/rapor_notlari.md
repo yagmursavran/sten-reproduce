@@ -95,3 +95,9 @@ Makaledeki donanım: AMD EPYC 7742 (64 çekirdek, AVX2), Intel Xeon Gold 6130 (1
 - g=16 n:m'ye çok yakın (50%'de fark 0.006); g=4 n:m'nin ~%95–98'ini koruyor
 - 90%'da n:m:g g=4 bloklu b=4'ten ~%60 fazla energy koruyor
 - Hız deneyiyle birlikte: 1:10:4 → ~2.2x hız, energy yapısıza yakın
+### 5 Kasım – PyTorch sıfırlarla hızlanıyor mu? (deneyler/pytorch_zeros_check.py)
+- Linear 1024x2048 girdi, 512x2048 ağırlık, 8 thread, Victus
+- Dense PyTorch: %0 4.69 ms, %50 4.75, %90 4.86, %99 4.94 → sıfır oranından bağımsız
+- PyTorch CSR: %0 53.04, %50 34.72, %90 9.51, %99 3.58 → dense'i ancak %99'da geçiyor
+- Sonuç: Fig 15b'de PyTorch'un tek "Dense" çubukla gösterilmesi doğru; düzensiz seyreklik
+  orta seviyelerde yavaş → n:m:g gibi yapılı formatın gerekçesi
