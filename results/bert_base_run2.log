@@ -1,0 +1,26 @@
+/home/berfin/envs/sten310/lib/python3.10/site-packages/torch/_utils.py:847: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  return self.fget.__get__(instance, owner)()
+/home/berfin/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:197: FutureWarning: `torch.distributed.reduce_op` is deprecated, please use `torch.distributed.ReduceOp` instead
+  return isinstance(object, type)
+torch 2.4.1+cu121 | threads 8 | OMP_NUM_THREADS=8 | x86_64
+model: bert-base-uncased | input 8x512
+     dense  median    1907.6 ms  [linear   1545.5 ms | other    362.1 ms]
+     3:6:4  converting weights ...
+     3:6:4  median    1463.6 ms  speedup  1.30x  sparsity 50%  kernel avx512  max|err| 7.35e+00  (convert 130.1s)
+            [linear   1040.7 ms | other    422.9 ms]
+     2:5:4  converting weights ...
+     2:5:4  median    1262.8 ms  speedup  1.51x  sparsity 60%  kernel avx512  max|err| 6.86e+00  (convert 123.9s)
+            [linear    834.0 ms | other    428.8 ms]
+     2:6:4  converting weights ...
+     2:6:4  median    1233.4 ms  speedup  1.55x  sparsity 67%  kernel avx512  max|err| 6.42e+00  (convert 126.5s)
+            [linear    814.0 ms | other    419.5 ms]
+     2:7:4  converting weights ...
+     2:7:4  median    1162.4 ms  speedup  1.64x  sparsity 71%  kernel avx512  max|err| 6.69e+00  (convert 129.6s)
+            [linear    719.4 ms | other    443.1 ms]
+     1:5:4  converting weights ...
+     1:5:4  median    1103.4 ms  speedup  1.73x  sparsity 80%  kernel avx512  max|err| 6.35e+00  (convert 118.2s)
+            [linear    663.9 ms | other    439.5 ms]
+    1:10:4  converting weights ...
+    1:10:4  median    1035.3 ms  speedup  1.84x  sparsity 90%  kernel avx512  max|err| 8.07e+00  (convert 119.0s)
+            [linear    471.6 ms | other    563.7 ms]
+    1:20:4  converting weights ...

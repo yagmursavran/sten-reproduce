@@ -101,3 +101,21 @@ Makaledeki donanım: AMD EPYC 7742 (64 çekirdek, AVX2), Intel Xeon Gold 6130 (1
 - PyTorch CSR: %0 53.04, %50 34.72, %90 9.51, %99 3.58 → dense'i ancak %99'da geçiyor
 - Sonuç: Fig 15b'de PyTorch'un tek "Dense" çubukla gösterilmesi doğru; düzensiz seyreklik
   orta seviyelerde yavaş → n:m:g gibi yapılı formatın gerekçesi
+### 5 Kasım – Figür 15b tam ayar (bert-base, 8x512, 7 seviye, orijinal kod)
+- Victus, Ryzen 7 7840HS, 8 thread, şarjda, torch 2.4.1, g=4 (makalede belirtilmemiş; yazarların
+  tests/test_nmg.py dosyasındaki değer), 2 ısınma + 10 tekrar medyanı
+- Betik: deneyler/bert_latency.py | Sonuçlar: results/bert_base_run1.*, run2.*, run2_part2.*,
+  run2_merged.csv, fig15b_bert_base.png
+- Dense PyTorch: 1934.5 ms (ölçüm 1), 1907.6 ms (ölçüm 2) — makalede ~2.87 s
+- Hızlanma (ölçüm 1 / ölçüm 2): 3:6 1.29/1.30, 2:5 1.53/1.51, 2:6 1.55/1.55, 2:7 1.73/1.64,
+  1:5 1.83/1.73, 1:10 2.06/2.06, 1:20 2.44/2.34
+- Makale (grafikten ≈): %50 ~2.3x, %90 ~3.0x, %95 ~3.2x → eğilim aynı, bizde daha düşük.
+  Olası sebep: bizim dense daha hızlı (PyTorch 2.4 vs 1.12, farklı CPU) — doğrulanmadı
+- Süre ayrımı: linear 1605 → 373 ms (seyreklikle azalıyor); other ~395–475 ms (sabit, dense'te ~330).
+  %90 ve %95'te other > linear → seyrek olmayan kısım baskın, tavan ≈ 1934/420 ≈ 4.6x
+- STen'li modelde "other" dense'ten ~100 ms fazla: muhtemelen STen Linear çıktısının bellek
+  düzeni (transpoze + kesme, sten_impls.py 168-170) sonraki işlemleri yavaşlatıyor — incelenecek
+- max|err| 6.4–11.0 (transpoze hatası)
+- Ölçüm 2, 1:20:4 çevrilirken bellek yetersizliğinden (OOM, 7.3 GB) kesildi. 1:10 ve 1:20
+  ayrı çalıştırmada ölçüldü (run2_part2); kesilmeden önceki 1:10 değeri (1.84x, other 564 ms)
+  bellek baskısından bozuk sayıldı
