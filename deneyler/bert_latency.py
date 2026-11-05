@@ -10,6 +10,15 @@ Usage examples:
   python deneyler/bert_latency.py --pretrained prajjwal1/bert-small # small pretrained BERT
   python deneyler/bert_latency.py --pretrained bert-base-uncased --batch 8 --seq 512  # paper setting
   python deneyler/bert_latency.py --kernel avx2                     # force the AVX2 kernel
+
+Full paper setting of Fig. 15b (BERT-base, batch 8, sequence 512, all seven sparsity levels):
+  python deneyler/bert_latency.py --pretrained bert-base-uncased --batch 8 --seq 512 \
+      --formats 3:6,2:5,2:6,2:7,1:5,1:10,1:20 --threads 8 --out results/bert_base_run1.csv
+
+Time breakdown (like the stacked bars of Fig. 15b): after the latency measurement, a second pass
+times the encoder Linear layers with forward hooks. "linear" is the time spent inside those layers
+(for sparse models: STen dispatch + n:m:g kernel + bias), "other" is everything else (attention
+softmax, LayerNorm, embeddings, PyTorch overhead). The latency columns are measured WITHOUT hooks.
 """
 import argparse
 import copy
@@ -91,6 +100,42 @@ def median_latency(fn, repeats, warmup):
     return statistics.median(times), min(times), max(times)
 
 
+def linear_breakdown(model, x, repeats):
+    """Median total time and median time spent inside the encoder Linear layers (forward hooks)."""
+    modules = [m for name, m in model.named_modules()
+               if isinstance(m, torch.nn.Linear) and "encoder.layer" in name]
+    start, acc = {}, [0.0]
+
+    def pre_hook(mod, inp):
+        start[id(mod)] = time.perf_counter()
+
+    def post_hook(mod, inp, out):
+        acc[0] += time.perf_counter() - start[id(mod)]
+
+    handles = [m.register_forward_pre_hook(pre_hook) for m in modules]
+    handles += [m.register_forward_hook(post_hook) for m in modules]
+    totals, linears = [], []
+    try:
+        for _ in range(repeats):
+            acc[0] = 0.0
+            t0 = time.perf_counter()
+            model(x)
+            totals.append(time.perf_counter() - t0)
+            linears.append(acc[0])
+    finally:
+        for h in handles:
+            h.remove()
+    return statistics.median(totals), statistics.median(linears)
+
+
+def save(rows, path):
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        w.writeheader()
+        w.writerows(rows)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--pretrained", default=None, help="HuggingFace model name; default: random weights")
@@ -104,6 +149,8 @@ def main():
     p.add_argument("--warmup", type=int, default=2)
     p.add_argument("--threads", type=int, default=None, help="torch threads (also set OMP_NUM_THREADS)")
     p.add_argument("--out", default="results/bert_latency.csv")
+    p.add_argument("--no-breakdown", action="store_true", help="skip the Linear/other time breakdown")
+    p.add_argument("--no-check", action="store_true", help="skip the correctness check (saves memory)")
     args = p.parse_args()
 
     if args.threads:
@@ -119,33 +166,47 @@ def main():
     rows = []
     with torch.no_grad():
         dense_med, dense_min, dense_max = median_latency(lambda: model(x), args.repeats, args.warmup)
-        rows.append(dict(format="dense", sparsity=0.0, kernel="-", median_s=dense_med,
-                         min_s=dense_min, max_s=dense_max, speedup=1.0, max_abs_err=0.0))
-        print(f"{'dense':>10}  median {dense_med*1000:9.1f} ms")
+        row = dict(format="dense", sparsity=0.0, kernel="-", median_s=dense_med, min_s=dense_min,
+                   max_s=dense_max, speedup=1.0, max_abs_err=0.0, linear_s="", other_s="", convert_s=0.0)
+        msg = f"{'dense':>10}  median {dense_med*1000:9.1f} ms"
+        if not args.no_breakdown:
+            _, lin = linear_breakdown(model, x, args.repeats)
+            row.update(linear_s=lin, other_s=dense_med - lin)
+            msg += f"  [linear {lin*1000:8.1f} ms | other {(dense_med-lin)*1000:8.1f} ms]"
+        rows.append(row)
+        save(rows, args.out)
+        print(msg, flush=True)
 
         for n, m in parse_formats(args.formats):
             label = f"{n}:{m}:{args.g}"
+            print(f"{label:>10}  converting weights ...", flush=True)
             t0 = time.perf_counter()
             sparse_model = sparsify(model, n, m, args.g, args.kernel)
             conv_s = time.perf_counter() - t0
-            ref = masked_dense_reference(model, sparse_model)
 
             y_sparse = sparse_model(x).last_hidden_state   # first call also compiles the kernel
-            y_ref = ref(x).last_hidden_state
-            err = (y_sparse - y_ref).abs().max().item()
+            err = float("nan")
+            if not args.no_check:
+                ref = masked_dense_reference(model, sparse_model)
+                err = (y_sparse - ref(x).last_hidden_state).abs().max().item()
+                del ref
 
             med, mn, mx = median_latency(lambda: sparse_model(x), args.repeats, args.warmup)
             kernel = get_attr(sparse_model, encoder_linear_weights(model)[0]).wrapped_tensor.nm_strides["kernel"]
-            rows.append(dict(format=label, sparsity=round(1 - n / m, 3), kernel=kernel, median_s=med,
-                             min_s=mn, max_s=mx, speedup=dense_med / med, max_abs_err=err))
-            print(f"{label:>10}  median {med*1000:9.1f} ms  speedup {dense_med/med:5.2f}x  "
-                  f"sparsity {1-n/m:.0%}  kernel {kernel}  max|err| {err:.2e}  (convert {conv_s:.1f}s)")
+            row = dict(format=label, sparsity=round(1 - n / m, 3), kernel=kernel, median_s=med, min_s=mn,
+                       max_s=mx, speedup=dense_med / med, max_abs_err=err, linear_s="", other_s="",
+                       convert_s=conv_s)
+            msg = (f"{label:>10}  median {med*1000:9.1f} ms  speedup {dense_med/med:5.2f}x  "
+                   f"sparsity {1-n/m:.0%}  kernel {kernel}  max|err| {err:.2e}  (convert {conv_s:.1f}s)")
+            if not args.no_breakdown:
+                _, lin = linear_breakdown(sparse_model, x, args.repeats)
+                row.update(linear_s=lin, other_s=med - lin)
+                msg += f"\n{'':>10}  [linear {lin*1000:8.1f} ms | other {(med-lin)*1000:8.1f} ms]"
+            rows.append(row)
+            save(rows, args.out)          # save after every format, so a long run is never lost
+            print(msg, flush=True)
+            del sparse_model
 
-    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
-    with open(args.out, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
-        w.writeheader()
-        w.writerows(rows)
     print(f"saved {args.out}")
 
 
