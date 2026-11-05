@@ -113,3 +113,15 @@ Hardware in the paper: AMD EPYC 7742 (64 cores, AVX2), Intel Xeon Gold 6130 (16 
 - In the STen model "other" is ~100 ms higher than in dense: probably the memory layout of STen's Linear output (transposed + sliced, sten_impls.py lines 168–170) slows down the following operations — to investigate
 - max|err| 6.4–11.0 (transpose bug)
 - Run 2 was killed by the out-of-memory killer (OOM, 7.3 GB) while converting 1:20:4. 1:10 and 1:20 were re-measured in a separate run (run2_part2); the 1:10 value from before the kill (1.84x, other 564 ms) is considered corrupted by memory pressure
+
+### 5 Nov – Table 2, lines of code (experiments/count_loc.py)
+- Input: the authors' own comparison files in lines_comparison/ (reference vs STen implementation of
+  Sparse-Marlin, SpQR, PyTorch 2:4, RoSA). Result: results/table2_loc.csv
+- Counted three ways: raw (wc -l), non-blank, code only (no blank lines, comments, imports, docstrings)
+- The paper's numbers are reproduced exactly with the RAW count (all lines):
+  Sparse-Marlin 133/239 vs 65, SpQR 297 vs 137, 2:4 216 vs 108, RoSA 1326 vs 314
+- Inconsistency: the caption says "excluding comments and Python imports", but the numbers equal the
+  raw line count; the files contain comment lines (e.g. a source URL in the first line, 14 comment
+  lines in rosa_ref_interface.py) and 4 import lines in rosa_ref_interface.py
+- Code-only count: reductions 52%, 71%, 50%, 50%, 75% (paper: 51%, 73%, 54%, 50%, 76%)
+  → the claim (">2x fewer lines") holds under every counting rule
