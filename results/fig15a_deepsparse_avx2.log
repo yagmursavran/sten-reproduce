@@ -1,0 +1,11 @@
+DeepSparse Engine, Copyright 2021-present / Neuralmagic, Inc. version: 1.1.0 COMMUNITY EDITION (a436ca67) (release) (optimized) (system=avx512_vnni, binary=avx2)
+Neural Magic: Using env variable NM_ARCH=avx2 for isa_type
+ dense  DeepSparse median    31.19 ms  (min 26.50, max 34.82)  max|err| 1.91e-04
+   50%  DeepSparse median    19.52 ms  (min 14.48, max 23.05)  max|err| 1.45e-04
+   60%  DeepSparse median    15.22 ms  (min 14.05, max 17.93)  max|err| 1.22e-04
+   67%  DeepSparse median    14.03 ms  (min 11.75, max 15.51)  max|err| 1.07e-04
+   71%  DeepSparse median    12.16 ms  (min 10.73, max 14.47)  max|err| 9.92e-05
+   80%  DeepSparse median    10.36 ms  (min 9.07, max 18.65)  max|err| 7.63e-05
+   90%  DeepSparse median     8.90 ms  (min 8.50, max 9.87)  max|err| 5.34e-05
+   95%  DeepSparse median     8.48 ms  (min 8.04, max 9.94)  max|err| 2.29e-05
+saved results/fig15a_deepsparse_avx2.csv

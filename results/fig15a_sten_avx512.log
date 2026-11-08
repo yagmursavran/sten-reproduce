@@ -1,0 +1,14 @@
+/home/berfin/envs/sten310/lib/python3.10/site-packages/torch/_utils.py:847: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  return self.fget.__get__(instance, owner)()
+/home/berfin/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:197: FutureWarning: `torch.distributed.reduce_op` is deprecated, please use `torch.distributed.ReduceOp` instead
+  return isinstance(object, type)
+torch 2.4.1+cu121 | threads 8 | GEMM 768x3072x4096 | kernel avx512
+   dense  PyTorch median    42.15 ms
+   3:6:4  STen    median    31.96 ms  sparsity 50%  kernel avx512  max|err| 3.96e+00
+   2:5:4  STen    median    25.05 ms  sparsity 60%  kernel avx512  max|err| 3.63e+00
+   2:6:4  STen    median    26.47 ms  sparsity 67%  kernel avx512  max|err| 3.66e+00
+   2:7:4  STen    median    22.12 ms  sparsity 71%  kernel avx512  max|err| 3.48e+00
+   1:5:4  STen    median    21.61 ms  sparsity 80%  kernel avx512  max|err| 2.78e+00
+  1:10:4  STen    median    17.72 ms  sparsity 90%  kernel avx512  max|err| 2.07e+00
+  1:20:4  STen    median    13.60 ms  sparsity 95%  kernel avx512  max|err| 1.54e+00
+saved results/fig15a_sten_avx512.csv

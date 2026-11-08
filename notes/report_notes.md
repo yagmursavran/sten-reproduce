@@ -125,3 +125,25 @@ Hardware in the paper: AMD EPYC 7742 (64 cores, AVX2), Intel Xeon Gold 6130 (16 
   lines in rosa_ref_interface.py) and 4 import lines in rosa_ref_interface.py
 - Code-only count: reductions 52%, 71%, 50%, 50%, 75% (paper: 51%, 73%, 54%, 50%, 76%)
   → the claim (">2x fewer lines") holds under every counting rule
+
+### 8 Nov – Fig. 15a, sparse-dense GEMM: STen n:m:g vs DeepSparse 1.1.0 (original code)
+- GEMM 768x3072x4096 (BERT-base FF layer), Victus Ryzen 7 7840HS, 8 threads/cores, median of 20 runs
+- Scripts: experiments/spmm_sten.py (sten310 env), experiments/spmm_deepsparse.py (separate env:
+  Python 3.10, deepsparse==1.1.0, onnx, numpy<1.24; pip missing in a plain `uv venv`, installed with
+  `uv pip install --python ...`). Results: results/fig15a_*.csv/.log, results/fig15a.png
+- STen (ms, 50/60/67/71/80/90/95%): AVX2 31.0/29.6/28.3/24.1/22.5/16.3/13.4,
+  AVX-512 32.0/25.1/26.5/22.1/21.6/17.7/13.6; dense PyTorch 45.9 / 42.2
+- DeepSparse unstructured (auto ISA = avx512_vnni): 17.2/14.1/12.7/11.8/10.1/7.9/7.3; dense 28.1
+- DeepSparse forced to AVX2 (NM_ARCH=avx2): 19.5/15.2/14.0/12.2/10.4/8.9/8.5; dense 31.2
+- Paper (read from figure, approx.): AMD EPYC (AVX2) STen 9.7→2.9 vs DeepSparse 20.7→11.5 (STen up to 3.9x
+  faster); Intel Xeon (AVX-512) STen 10.2→3.4 vs DeepSparse 13.6→5.1 (STen ~1.3–1.5x faster)
+- NOT reproduced on our CPU: DeepSparse is ~1.6–2.2x FASTER than STen at every level, also when both use
+  AVX2 → the ISA does not explain it. Same trend otherwise (both get faster with sparsity; STen beats
+  dense PyTorch 1.5x at 50%, 3.4x at 95%)
+- Our DeepSparse times are close to the paper's Intel numbers, but our STen times are ~3x slower → the
+  gap is in STen's kernel on our machine. Possible causes (untested): kernel parameters tuned for the
+  authors' CPUs, GCC 13 vs 8.4, scaling with core count. Consistent with Fig. 15b (gap in the Linear part)
+- STen AVX2 vs AVX-512 almost identical on Zen 4 (AVX-512 gives no benefit here)
+- New finding: STen's n:m:g linear is registered only for (Tensor, GroupedNMTensor, Tensor). A Linear
+  without bias silently falls back to dense PyTorch (no speedup, no visible warning). The benchmark uses a
+  zero bias for this reason; max|err| > 0 (transpose bug) confirms the n:m:g kernel ran
