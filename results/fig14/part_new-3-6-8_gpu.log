@@ -1,0 +1,5 @@
+usage: masked_training_overhead.py [-h] [--model MODEL] [--tiny]
+                                   [--batch BATCH] [--seq SEQ] [--steps STEPS]
+                                   [--warmup WARMUP] [--device DEVICE]
+                                   [--configs CONFIGS] [--out OUT]
+masked_training_overhead.py: error: unrecognized arguments: --nmg-on-gpu

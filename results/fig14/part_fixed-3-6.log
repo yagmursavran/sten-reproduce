@@ -1,0 +1,9 @@
+'(MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /bert-base-uncased/resolve/main/config.json (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1017)')))"), '(Request ID: a3216d83-9752-438a-9745-f06e3ff23c3f)')' thrown while requesting HEAD https://huggingface.co/bert-base-uncased/resolve/main/config.json
+Retrying in 1s [Retry 1/5].
+Some weights of the model checkpoint at bert-base-uncased were not used when initializing BertForMaskedLM: ['bert.pooler.dense.bias', 'bert.pooler.dense.weight', 'cls.seq_relationship.bias', 'cls.seq_relationship.weight']
+- This IS expected if you are initializing BertForMaskedLM from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForMaskedLM from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+torch 2.4.1+cu121 | device NVIDIA GeForce RTX 4050 Laptop GPU | model bert-base-uncased | batch 16 x seq 128 | 10 steps after 3 warm-up
+       dense  step   0.289 s  [pytorch 0.289 | sten 0.000 | sparsification 0.000]   1.00x dense  sparsity 0.0%  gpu mem 3.14 GiB
+   fixed-3:6  step   0.394 s  [pytorch 0.289 | sten 0.105 | sparsification 0.000]   1.36x dense  sparsity 50.0%  gpu mem 4.21 GiB
+saved results/fig14/part_fixed-3-6.csv

@@ -1,0 +1,7 @@
+Some weights of the model checkpoint at bert-base-uncased were not used when initializing BertForMaskedLM: ['bert.pooler.dense.bias', 'bert.pooler.dense.weight', 'cls.seq_relationship.bias', 'cls.seq_relationship.weight']
+- This IS expected if you are initializing BertForMaskedLM from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForMaskedLM from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+torch 2.4.1+cu121 | device NVIDIA GeForce RTX 4050 Laptop GPU | model bert-base-uncased | batch 16 x seq 128 | 10 steps after 3 warm-up
+       dense  step   0.287 s  [pytorch 0.287 | sten 0.000 | sparsification 0.000]   1.00x dense  sparsity 0.0%  gpu mem 3.14 GiB
+     new-50%  step   0.810 s  [pytorch 0.287 | sten 0.175 | sparsification 0.348]   2.82x dense  sparsity 50.0%  gpu mem 4.21 GiB
+saved results/fig14/part_new-50p.csv
